@@ -1,0 +1,20 @@
+Instalar
+pip install ven
+
+Criar ambiente
+python -m venv venv
+
+Ativar Ambiente Virtual
+venv/Scripts/Activate
+
+Desativar
+	deactivate
+
+
+
+# Gerar o arquivo requirements.txt
+pip freeze > requirements.txt
+
+#Instalar as bibliotecas do requirements
+pip install -r requirements.txt
+
