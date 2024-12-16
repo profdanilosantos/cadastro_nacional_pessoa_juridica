@@ -14,38 +14,75 @@ db_file = cfg.db_file
 conn = duckdb.connect(db_file)
 
 
-query = 'DROP TABLE IF EXISTS silver_estabelecimento'
+query = f'DROP TABLE IF EXISTS silver_empresa'
+print(query)
 conn.execute(query)
 
-query = '''CREATE TABLE silver_estabelecimento
+query = f'''CREATE TABLE silver_empresa
 AS
 SELECT row_number() OVER() AS id,a.* FROM (
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_0
+	SELECT *  FROM bronze_empresa_0
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_1
+	SELECT *  FROM bronze_empresa_1
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_2
+	SELECT *  FROM bronze_empresa_2
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_3
+	SELECT *  FROM bronze_empresa_3
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_4
+	SELECT *  FROM bronze_empresa_4
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_5
+	SELECT *  FROM bronze_empresa_5
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_6
+	SELECT *  FROM bronze_empresa_6
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_7
+	SELECT *  FROM bronze_empresa_7
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_8
+	SELECT *  FROM bronze_empresa_8
 	UNION
-	SELECT * EXCLUDE (cidade_exterior,codigo_pais) FROM bronze_estabelecimento_9
+	SELECT *  FROM bronze_empresa_9
 ) a
 '''
 print(query)
 conn.execute(query)
 
+query = f"SELECT uf FROM './data/diversos/estados.csv' "
+result = conn.execute(query).fetchall()
+for dados in result:
+	estado = dados[0]
 
+	query = f'DROP TABLE IF EXISTS silver_empresa_{estado}'
+	print(query)
+	conn.execute(query)
 
+	query = f'''CREATE TABLE silver_empresa_{estado}
+	AS
+	SELECT row_number() OVER() AS id,a.* FROM (
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_0
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_1
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_2
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_3
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_4
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_5
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_6
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_7
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_8
+		UNION
+		SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_9
+	) a
+	WHERE a.cnpj_basico IN (
+		SELECT cnpj_basico FROM silver_estabelecimento_{estado}
+	)
+	'''
+	print(query)
+	conn.execute(query)
 
 
 
@@ -53,8 +90,6 @@ conn.execute(query)
 
 
 '''
-
-
 
 
 --
@@ -101,34 +136,6 @@ GROUP BY all
 --
 FROM bronze_empresa_0
 
-
---
-CREATE OR REPLACE TABLE silver_empresa
-AS
-SELECT row_number() OVER() AS id,a.* FROM (
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_0
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_1
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_2
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_3
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_4
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_5
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_6
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_7
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_8
-	UNION
-	SELECT * EXCLUDE (ente_federativo) FROM bronze_empresa_9
-) a
-WHERE a.cnpj_basico IN (
-	SELECT cnpj_basico FROM silver_estabelecimento
-)
 
 --
 FROM silver_empresa
